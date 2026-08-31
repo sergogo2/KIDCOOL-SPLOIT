@@ -1,0 +1,690 @@
+
+-- maingui BY KidCOOL Farm  Hacks  ESP  Info  Noclip)
+--open srs
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+
+local player = Players.LocalPlayer
+local character = player.Character
+local rootPart, humanoid, flyBodyVelocity, flyActive = nil, nil, nil, false
+local savedSpeed, savedJump = 1.0, 1.0
+
+local function updateCharacter()
+    character = player.Character
+    if character then
+        rootPart = character:FindFirstChild("HumanoidRootPart")
+        humanoid = character:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = 16 * savedSpeed
+            humanoid.JumpPower = 50 * savedJump
+        end
+    else
+        rootPart, humanoid = nil, nil
+    end
+end
+updateCharacter()
+
+local function getTargetPart()
+    local part = Workspace:FindFirstChild("SLAP TOWER KIT V2")
+    if part then part = part:FindFirstChild("[1] Ungroup in Workspace") end
+    if part then part = part:FindFirstChild("Interactive") end
+    if part then part = part:FindFirstChild("TouchParts") end
+    if part then part = part:FindFirstChild("Finish") end
+    if part then part = part:FindFirstChild("TouchPart") end
+    return part
+end
+local targetPart = getTargetPart()
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "maingui_KidCOOL"
+screenGui.Parent = player.PlayerGui
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 360, 0, 280)
+mainFrame.Position = UDim2.new(0.5, -180, 0.5, -140)
+mainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+mainFrame.BackgroundTransparency = 0.1
+mainFrame.BorderSizePixel = 1
+mainFrame.BorderColor3 = Color3.fromRGB(80, 80, 85)
+mainFrame.Active = true
+mainFrame.Visible = true
+mainFrame.Parent = screenGui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 6)
+corner.Parent = mainFrame
+
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 30)
+titleBar.Position = UDim2.new(0, 0, 0, 0)
+titleBar.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+titleBar.BackgroundTransparency = 0.2
+titleBar.BorderSizePixel = 0
+titleBar.Parent = mainFrame
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 6)
+titleCorner.Parent = titleBar
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, -60, 1, 0)
+titleLabel.Position = UDim2.new(0, 10, 0, 0)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "maingui BY KidCOOL"
+titleLabel.TextColor3 = Color3.fromRGB(180, 180, 185)
+titleLabel.TextSize = 14
+titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.Parent = titleBar
+
+local minimizeBtn = Instance.new("TextButton")
+minimizeBtn.Size = UDim2.new(0, 30, 0, 30)
+minimizeBtn.Position = UDim2.new(1, -30, 0, 0)
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 65)
+minimizeBtn.BackgroundTransparency = 0.2
+minimizeBtn.Text = "–"
+minimizeBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+minimizeBtn.TextSize = 18
+minimizeBtn.Font = Enum.Font.GothamBold
+minimizeBtn.BorderSizePixel = 0
+minimizeBtn.Parent = titleBar
+
+-- Tabs (5x72)
+local tabContainer = Instance.new("Frame")
+tabContainer.Size = UDim2.new(1, 0, 0, 30)
+tabContainer.Position = UDim2.new(0, 0, 0, 30)
+tabContainer.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+tabContainer.BorderSizePixel = 0
+tabContainer.Parent = mainFrame
+
+local tabs = {}
+local tabNames = {"Farm","Hacks","ESP","Info","Noclip"}
+local contents = {}
+for i, name in ipairs(tabNames) do
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 72, 0, 30)
+    btn.Position = UDim2.new(0, (i-1)*72, 0, 0)
+    btn.BackgroundColor3 = (i==1) and Color3.fromRGB(60,60,65) or Color3.fromRGB(40,40,45)
+    btn.Text = name
+    btn.TextColor3 = (i==1) and Color3.fromRGB(220,220,220) or Color3.fromRGB(180,180,180)
+    btn.TextSize = 11
+    btn.Font = Enum.Font.GothamBold
+    btn.BorderSizePixel = 0
+    btn.Parent = tabContainer
+    tabs[name] = btn
+
+    local content = Instance.new("Frame")
+    content.Size = UDim2.new(1, 0, 0, 220)
+    content.Position = UDim2.new(0, 0, 0, 60)
+    content.BackgroundTransparency = 1
+    content.Visible = (i==1)
+    content.Parent = mainFrame
+    contents[name] = content
+end
+
+local function switchTab(tab)
+    for name, content in pairs(contents) do
+        content.Visible = (name == tab)
+    end
+    for name, btn in pairs(tabs) do
+        local active = (name == tab)
+        btn.BackgroundColor3 = active and Color3.fromRGB(60,60,65) or Color3.fromRGB(40,40,45)
+        btn.TextColor3 = active and Color3.fromRGB(220,220,220) or Color3.fromRGB(180,180,180)
+    end
+end
+for name, btn in pairs(tabs) do
+    btn.MouseButton1Click:Connect(function() switchTab(name) end)
+end
+
+local contentFarm, contentHacks, contentESP, contentInfo, contentNoclip = contents.Farm, contents.Hacks, contents.ESP, contents.Info, contents.Noclip
+
+-- ===== FARM =====
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(0, 300, 0, 22)
+statusLabel.Position = UDim2.new(0, 30, 0, 20)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = targetPart and "TARGET FOUND" or "TARGET NOT FOUND"
+statusLabel.TextColor3 = targetPart and Color3.fromRGB(180,180,180) or Color3.fromRGB(200,100,100)
+statusLabel.TextSize = 13
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.TextXAlignment = Enum.TextXAlignment.Center
+statusLabel.Parent = contentFarm
+
+local counterLabel = Instance.new("TextLabel")
+counterLabel.Size = UDim2.new(0, 300, 0, 20)
+counterLabel.Position = UDim2.new(0, 30, 0, 48)
+counterLabel.BackgroundTransparency = 1
+counterLabel.Text = "TOUCHES: 0"
+counterLabel.TextColor3 = Color3.fromRGB(180,180,180)
+counterLabel.TextSize = 13
+counterLabel.Font = Enum.Font.Gotham
+counterLabel.TextXAlignment = Enum.TextXAlignment.Center
+counterLabel.Parent = contentFarm
+
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Size = UDim2.new(0, 160, 0, 36)
+toggleBtn.Position = UDim2.new(0, 100, 0, 85)
+toggleBtn.BackgroundColor3 = targetPart and Color3.fromRGB(70,70,75) or Color3.fromRGB(50,50,55)
+toggleBtn.Text = targetPart and "START" or "NO TARGET"
+toggleBtn.TextColor3 = Color3.fromRGB(220,220,220)
+toggleBtn.TextSize = 16
+toggleBtn.Font = Enum.Font.GothamBold
+toggleBtn.BorderSizePixel = 0
+toggleBtn.Parent = contentFarm
+local btnCorner = Instance.new("UICorner")
+btnCorner.CornerRadius = UDim.new(0,4)
+btnCorner.Parent = toggleBtn
+
+local delayLabel = Instance.new("TextLabel")
+delayLabel.Size = UDim2.new(0, 120, 0, 22)
+delayLabel.Position = UDim2.new(0, 30, 0, 140)
+delayLabel.BackgroundTransparency = 1
+delayLabel.Text = "Delay: 0.05s"
+delayLabel.TextColor3 = Color3.fromRGB(180,180,180)
+delayLabel.TextSize = 13
+delayLabel.Font = Enum.Font.Gotham
+delayLabel.TextXAlignment = Enum.TextXAlignment.Left
+delayLabel.Parent = contentFarm
+
+local delaySlider = Instance.new("Frame")
+delaySlider.Size = UDim2.new(0, 150, 0, 6)
+delaySlider.Position = UDim2.new(0, 160, 0, 146)
+delaySlider.BackgroundColor3 = Color3.fromRGB(60,60,65)
+delaySlider.BorderSizePixel = 0
+delaySlider.Parent = contentFarm
+local delayFill = Instance.new("Frame")
+delayFill.Size = UDim2.new(0.5,0,1,0)
+delayFill.BackgroundColor3 = Color3.fromRGB(180,180,180)
+delayFill.BorderSizePixel = 0
+delayFill.Parent = delaySlider
+local delayButton = Instance.new("TextButton")
+delayButton.Size = UDim2.new(1,0,1,0)
+delayButton.BackgroundTransparency = 1
+delayButton.Text = ""
+delayButton.Parent = delaySlider
+local delayVal = 0.05
+delayButton.MouseButton1Down:Connect(function()
+    local function update(input)
+        local relX = math.clamp((input.Position.X - delaySlider.AbsolutePosition.X) / delaySlider.AbsoluteSize.X, 0, 1)
+        delayFill.Size = UDim2.new(relX,0,1,0)
+        delayVal = 0.01 + relX*0.09
+        delayLabel.Text = "Delay: "..string.format("%.2f",delayVal).."s"
+    end
+    update({Position = UserInputService:GetMouseLocation()})
+    local conn
+    conn = UserInputService.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then update(input) end
+    end)
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then conn:Disconnect() end
+    end)
+end)
+
+-- ===== HACKS =====
+local function makeSlider(parent, y, labelText, callback, initialVal)
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(0, 120, 0, 22)
+    lbl.Position = UDim2.new(0, 30, 0, y)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = labelText
+    lbl.TextColor3 = Color3.fromRGB(180,180,180)
+    lbl.TextSize = 13
+    lbl.Font = Enum.Font.Gotham
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Parent = parent
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 200, 0, 6)
+    frame.Position = UDim2.new(0, 160, 0, y+6)
+    frame.BackgroundColor3 = Color3.fromRGB(60,60,65)
+    frame.BorderSizePixel = 0
+    frame.Parent = parent
+    local fill = Instance.new("Frame")
+    fill.Size = UDim2.new(initialVal or 0.2,0,1,0)
+    fill.BackgroundColor3 = Color3.fromRGB(180,180,180)
+    fill.BorderSizePixel = 0
+    fill.Parent = frame
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1,0,1,0)
+    btn.BackgroundTransparency = 1
+    btn.Text = ""
+    btn.Parent = frame
+    btn.MouseButton1Down:Connect(function()
+        local function upd(input)
+            local relX = math.clamp((input.Position.X - frame.AbsolutePosition.X) / frame.AbsoluteSize.X, 0, 1)
+            fill.Size = UDim2.new(relX,0,1,0)
+            callback(relX)
+            lbl.Text = labelText:match("^.*:").." "..string.format("%.1f", 1+relX*4).."x"
+        end
+        upd({Position = UserInputService:GetMouseLocation()})
+        local conn
+        conn = UserInputService.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement then upd(input) end
+        end)
+        UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then conn:Disconnect() end
+        end)
+    end)
+    return lbl
+end
+
+local speedLbl = makeSlider(contentHacks, 20, "Speed: 1.0x", function(relX)
+    savedSpeed = 1 + relX*4
+    if humanoid then humanoid.WalkSpeed = 16 * savedSpeed end
+end, 0.2)
+
+local jumpLbl = makeSlider(contentHacks, 60, "Jump: 1.0x", function(relX)
+    savedJump = 1 + relX*4
+    if humanoid then humanoid.JumpPower = 50 * savedJump end
+end, 0.2)
+
+local flyBtn = Instance.new("TextButton")
+flyBtn.Size = UDim2.new(0, 120, 0, 30)
+flyBtn.Position = UDim2.new(0, 30, 0, 105)
+flyBtn.BackgroundColor3 = Color3.fromRGB(60,60,65)
+flyBtn.Text = "FLY OFF"
+flyBtn.TextColor3 = Color3.fromRGB(220,220,220)
+flyBtn.TextSize = 14
+flyBtn.Font = Enum.Font.GothamBold
+flyBtn.BorderSizePixel = 0
+flyBtn.Parent = contentHacks
+local flyCorner = Instance.new("UICorner")
+flyCorner.CornerRadius = UDim.new(0,4)
+flyCorner.Parent = flyBtn
+
+local flyStatus = false
+flyBtn.MouseButton1Click:Connect(function()
+    flyStatus = not flyStatus
+    flyBtn.Text = flyStatus and "FLY ON" or "FLY OFF"
+    flyBtn.BackgroundColor3 = flyStatus and Color3.fromRGB(100,70,70) or Color3.fromRGB(60,60,65)
+    if flyStatus then enableFly() else disableFly() end
+end)
+
+-- ===== ESP =====
+local espStatusLabel = Instance.new("TextLabel")
+espStatusLabel.Size = UDim2.new(0, 300, 0, 22)
+espStatusLabel.Position = UDim2.new(0, 30, 0, 20)
+espStatusLabel.BackgroundTransparency = 1
+espStatusLabel.Text = "ESP: OFF"
+espStatusLabel.TextColor3 = Color3.fromRGB(180,180,180)
+espStatusLabel.TextSize = 13
+espStatusLabel.Font = Enum.Font.Gotham
+espStatusLabel.TextXAlignment = Enum.TextXAlignment.Center
+espStatusLabel.Parent = contentESP
+
+local glowBtn = Instance.new("TextButton")
+glowBtn.Size = UDim2.new(0, 160, 0, 36)
+glowBtn.Position = UDim2.new(0, 100, 0, 60)
+glowBtn.BackgroundColor3 = Color3.fromRGB(60,60,65)
+glowBtn.Text = "GLOW OFF"
+glowBtn.TextColor3 = Color3.fromRGB(220,220,220)
+glowBtn.TextSize = 16
+glowBtn.Font = Enum.Font.GothamBold
+glowBtn.BorderSizePixel = 0
+glowBtn.Parent = contentESP
+local glowCorner = Instance.new("UICorner")
+glowCorner.CornerRadius = UDim.new(0,4)
+glowCorner.Parent = glowBtn
+
+local espObjects, espActive, rainbowConnection = {}, false, nil
+
+local function createESPForPlayer(plr)
+    if plr == player or espObjects[plr] then return end
+    local char = plr.Character
+    if not char then return end
+    local highlight = Instance.new("Highlight")
+    highlight.FillColor = Color3.fromRGB(255,0,0)
+    highlight.OutlineColor = Color3.fromRGB(255,255,255)
+    highlight.FillTransparency = 0.5
+    highlight.OutlineTransparency = 0.2
+    highlight.Adornee = char
+    highlight.Parent = char
+    local bill = Instance.new("BillboardGui")
+    bill.Size = UDim2.new(0,200,0,40)
+    bill.StudsOffset = Vector3.new(0,2.5,0)
+    bill.AlwaysOnTop = true
+    bill.Parent = char
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(1,0,1,0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.Text = plr.Name
+    textLabel.TextColor3 = Color3.fromRGB(255,255,255)
+    textLabel.TextSize = 16
+    textLabel.Font = Enum.Font.GothamBold
+    textLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+    textLabel.TextStrokeTransparency = 0.3
+    textLabel.Parent = bill
+    espObjects[plr] = {Highlight = highlight, Billboard = bill}
+end
+
+local function removeESPForPlayer(plr)
+    local data = espObjects[plr]
+    if data then
+        if data.Highlight then data.Highlight:Destroy() end
+        if data.Billboard then data.Billboard:Destroy() end
+        espObjects[plr] = nil
+    end
+end
+
+local function updateRainbow()
+    local color = Color3.fromHSV((os.clock()*0.3)%1, 1, 1)
+    for _, data in pairs(espObjects) do
+        if data.Highlight then data.Highlight.FillColor = color end
+    end
+end
+
+local function enableESP()
+    if espActive then return end
+    espActive = true
+    espStatusLabel.Text, espStatusLabel.TextColor3 = "ESP: ON", Color3.fromRGB(180,220,180)
+    glowBtn.Text, glowBtn.BackgroundColor3 = "GLOW ON", Color3.fromRGB(100,70,70)
+    for _, plr in pairs(Players:GetPlayers()) do createESPForPlayer(plr) end
+    Players.PlayerAdded:Connect(function(plr) if espActive then createESPForPlayer(plr) end end)
+    Players.PlayerRemoving:Connect(removeESPForPlayer)
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= player then
+            plr.CharacterAdded:Connect(function()
+                if espActive then removeESPForPlayer(plr) createESPForPlayer(plr) end
+            end)
+        end
+    end
+    if rainbowConnection then rainbowConnection:Disconnect() end
+    rainbowConnection = RunService.RenderStepped:Connect(updateRainbow)
+end
+
+local function disableESP()
+    if not espActive then return end
+    espActive = false
+    espStatusLabel.Text, espStatusLabel.TextColor3 = "ESP: OFF", Color3.fromRGB(180,180,180)
+    glowBtn.Text, glowBtn.BackgroundColor3 = "GLOW OFF", Color3.fromRGB(60,60,65)
+    for plr, _ in pairs(espObjects) do removeESPForPlayer(plr) end
+    espObjects = {}
+    if rainbowConnection then rainbowConnection:Disconnect() rainbowConnection = nil end
+end
+
+glowBtn.MouseButton1Click:Connect(function() if espActive then disableESP() else enableESP() end end)
+
+-- ===== INFO =====
+local infoLabel = Instance.new("TextLabel")
+infoLabel.Size = UDim2.new(0, 320, 0, 180)
+infoLabel.Position = UDim2.new(0, 20, 0, 20)
+infoLabel.BackgroundTransparency = 1
+infoLabel.Text = "Разработчик: KIDCOOL"
+infoLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+infoLabel.TextSize = 24
+infoLabel.Font = Enum.Font.GothamBold
+infoLabel.TextXAlignment = Enum.TextXAlignment.Center
+infoLabel.TextYAlignment = Enum.TextYAlignment.Center
+infoLabel.Parent = contentInfo
+
+-- ===== NOCLIP =====
+local noclipStatusLabel = Instance.new("TextLabel")
+noclipStatusLabel.Size = UDim2.new(0, 300, 0, 22)
+noclipStatusLabel.Position = UDim2.new(0, 30, 0, 20)
+noclipStatusLabel.BackgroundTransparency = 1
+noclipStatusLabel.Text = "NOCLIP: OFF"
+noclipStatusLabel.TextColor3 = Color3.fromRGB(180,180,180)
+noclipStatusLabel.TextSize = 13
+noclipStatusLabel.Font = Enum.Font.Gotham
+noclipStatusLabel.TextXAlignment = Enum.TextXAlignment.Center
+noclipStatusLabel.Parent = contentNoclip
+
+local noclipBtn = Instance.new("TextButton")
+noclipBtn.Size = UDim2.new(0, 160, 0, 36)
+noclipBtn.Position = UDim2.new(0, 100, 0, 60)
+noclipBtn.BackgroundColor3 = Color3.fromRGB(60,60,65)
+noclipBtn.Text = "NOCLIP OFF"
+noclipBtn.TextColor3 = Color3.fromRGB(220,220,220)
+noclipBtn.TextSize = 16
+noclipBtn.Font = Enum.Font.GothamBold
+noclipBtn.BorderSizePixel = 0
+noclipBtn.Parent = contentNoclip
+local noclipCorner = Instance.new("UICorner")
+noclipCorner.CornerRadius = UDim.new(0,4)
+noclipCorner.Parent = noclipBtn
+
+local noclipActive, noclipConnections = false, {}
+
+local function setPartsCollide(parts, value)
+    for _, part in ipairs(parts) do
+        if part:IsA("BasePart") then
+            part.CanCollide = value
+        end
+    end
+end
+
+local function applyNoclip(character)
+    if not character then return end
+    local parts = character:GetDescendants()
+    setPartsCollide(parts, false)
+    local conn = character.DescendantAdded:Connect(function(part)
+        if part:IsA("BasePart") and noclipActive then
+            part.CanCollide = false
+        end
+    end)
+    table.insert(noclipConnections, conn)
+end
+
+local function removeNoclip(character)
+    if not character then return end
+    local parts = character:GetDescendants()
+    setPartsCollide(parts, true)
+    for _, conn in ipairs(noclipConnections) do
+        conn:Disconnect()
+    end
+    noclipConnections = {}
+end
+
+local function enableNoclip()
+    if noclipActive then return end
+    noclipActive = true
+    noclipStatusLabel.Text, noclipStatusLabel.TextColor3 = "NOCLIP: ON", Color3.fromRGB(180,220,180)
+    noclipBtn.Text, noclipBtn.BackgroundColor3 = "NOCLIP ON", Color3.fromRGB(100,70,70)
+    if character then applyNoclip(character) end
+end
+
+local function disableNoclip()
+    if not noclipActive then return end
+    noclipActive = false
+    noclipStatusLabel.Text, noclipStatusLabel.TextColor3 = "NOCLIP: OFF", Color3.fromRGB(180,180,180)
+    noclipBtn.Text, noclipBtn.BackgroundColor3 = "NOCLIP OFF", Color3.fromRGB(60,60,65)
+    if character then removeNoclip(character) end
+end
+
+noclipBtn.MouseButton1Click:Connect(function() if noclipActive then disableNoclip() else enableNoclip() end end)
+
+-- ===== MINIMIZE =====
+local minimizedFrame = Instance.new("Frame")
+minimizedFrame.Size = UDim2.new(0, 100, 0, 30)
+minimizedFrame.Position = UDim2.new(0, 10, 0, 10)
+minimizedFrame.BackgroundColor3 = Color3.fromRGB(40,40,45)
+minimizedFrame.BackgroundTransparency = 0.1
+minimizedFrame.BorderSizePixel = 1
+minimizedFrame.BorderColor3 = Color3.fromRGB(80,80,85)
+minimizedFrame.Visible = false
+minimizedFrame.Parent = screenGui
+local minCorner = Instance.new("UICorner")
+minCorner.CornerRadius = UDim.new(0,6)
+minCorner.Parent = minimizedFrame
+
+local minLabel = Instance.new("TextLabel")
+minLabel.Size = UDim2.new(1,0,1,0)
+minLabel.Position = UDim2.new(0,5,0,0)
+minLabel.BackgroundTransparency = 1
+minLabel.Text = "auto farm"
+minLabel.TextColor3 = Color3.fromRGB(180,180,185)
+minLabel.TextSize = 14
+minLabel.Font = Enum.Font.GothamBold
+minLabel.TextXAlignment = Enum.TextXAlignment.Center
+minLabel.Parent = minimizedFrame
+
+local expandBtn = Instance.new("TextButton")
+expandBtn.Size = UDim2.new(1,0,1,0)
+expandBtn.Position = UDim2.new(0,0,0,0)
+expandBtn.BackgroundTransparency = 1
+expandBtn.Text = ""
+expandBtn.Parent = minimizedFrame
+
+local isMinimized = false
+local function minimize()
+    if isMinimized then return end
+    isMinimized = true
+    mainFrame.Visible = false
+    minimizedFrame.Visible = true
+end
+local function expand()
+    if not isMinimized then return end
+    isMinimized = false
+    minimizedFrame.Visible = false
+    mainFrame.Visible = true
+end
+minimizeBtn.MouseButton1Click:Connect(minimize)
+expandBtn.MouseButton1Click:Connect(expand)
+
+-- ===== DRAG =====
+local isDragging, dragOffset = false, Vector2.new()
+titleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 and not isMinimized then
+        isDragging = true
+        dragOffset = UserInputService:GetMouseLocation() - Vector2.new(mainFrame.AbsolutePosition.X, mainFrame.AbsolutePosition.Y)
+    end
+end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then isDragging = false end
+end)
+RunService.RenderStepped:Connect(function()
+    if isDragging and not isMinimized then
+        local mouse = UserInputService:GetMouseLocation()
+        local newPos = mouse - dragOffset
+        newPos = Vector2.new(math.clamp(newPos.X,0,screenGui.AbsoluteSize.X-360), math.clamp(newPos.Y,0,screenGui.AbsoluteSize.Y-280))
+        mainFrame.Position = UDim2.new(0, newPos.X, 0, newPos.Y)
+    end
+end)
+
+-- ===== FLY =====
+function enableFly()
+    if not character or not rootPart or not humanoid then return end
+    flyActive = true
+    humanoid.PlatformStand = true
+    flyBodyVelocity = Instance.new("BodyVelocity")
+    flyBodyVelocity.MaxForce = Vector3.new(1e6,1e6,1e6)
+    flyBodyVelocity.Velocity = Vector3.new(0,0,0)
+    flyBodyVelocity.Parent = rootPart
+end
+
+function disableFly()
+    flyActive = false
+    if humanoid then humanoid.PlatformStand = false end
+    if flyBodyVelocity then flyBodyVelocity:Destroy() flyBodyVelocity = nil end
+end
+
+RunService.RenderStepped:Connect(function()
+    if not flyActive or not rootPart or not flyBodyVelocity then return end
+    local cam = workspace.CurrentCamera
+    if not cam then return end
+    local forward, right, up = cam.CFrame.LookVector, cam.CFrame.RightVector, cam.CFrame.UpVector
+    local moveVec = Vector3.new(
+        (UserInputService:IsKeyDown(Enum.KeyCode.D) and 1 or 0) - (UserInputService:IsKeyDown(Enum.KeyCode.A) and 1 or 0),
+        (UserInputService:IsKeyDown(Enum.KeyCode.Space) and 1 or 0) - (UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) and 1 or 0),
+        (UserInputService:IsKeyDown(Enum.KeyCode.W) and 1 or 0) - (UserInputService:IsKeyDown(Enum.KeyCode.S) and 1 or 0)
+    )
+    local move = right*moveVec.X + up*moveVec.Y + forward*moveVec.Z
+    if move.Magnitude > 0 then
+        move = move.Unit * 50
+        rootPart.CFrame = CFrame.new(rootPart.Position, rootPart.Position + move.Unit)
+    else
+        rootPart.CFrame = CFrame.new(rootPart.Position, rootPart.Position + forward)
+    end
+    flyBodyVelocity.Velocity = move
+end)
+
+-- ===== FARM LOOP =====
+local isActive, touchCount, loopThread = false, 0, nil
+
+local function touchCycle()
+    if not targetPart then
+        targetPart = getTargetPart()
+        if not targetPart then
+            statusLabel.Text, statusLabel.TextColor3 = "TARGET LOST", Color3.fromRGB(200,100,100)
+            return
+        end
+    end
+    if not rootPart or not rootPart.Parent then return end
+    local originalCF = rootPart.CFrame
+    rootPart.CFrame = CFrame.new(targetPart.Position + Vector3.new(0,2.5,0))
+    task.wait(delayVal)
+    pcall(function() targetPart:FireTouchInterest(rootPart) end)
+    rootPart.CFrame = originalCF
+    touchCount = touchCount + 1
+    counterLabel.Text = "TOUCHES: "..touchCount
+    task.wait(delayVal)
+end
+
+local function runLoop()
+    while isActive do
+        if not rootPart or not rootPart.Parent or not humanoid or humanoid.Health <= 0 then stopLoop() break end
+        touchCycle()
+    end
+end
+
+local function startLoop()
+    if isActive then return end
+    if not targetPart then
+        targetPart = getTargetPart()
+        if not targetPart then statusLabel.Text, statusLabel.TextColor3 = "TARGET NOT FOUND", Color3.fromRGB(200,100,100) return end
+    end
+    if not rootPart or not rootPart.Parent or not humanoid or humanoid.Health <= 0 then
+        statusLabel.Text, statusLabel.TextColor3 = "WAIT FOR CHARACTER", Color3.fromRGB(200,180,0)
+        return
+    end
+    isActive = true
+    touchCount = 0
+    counterLabel.Text = "TOUCHES: 0"
+    loopThread = coroutine.create(runLoop)
+    coroutine.resume(loopThread)
+    statusLabel.Text, statusLabel.TextColor3 = "ACTIVE", Color3.fromRGB(180,220,180)
+    toggleBtn.Text, toggleBtn.BackgroundColor3 = "STOP", Color3.fromRGB(100,70,70)
+end
+
+local function stopLoop()
+    if not isActive then return end
+    isActive = false
+    loopThread = nil
+    targetPart = getTargetPart()
+    statusLabel.Text = targetPart and "TARGET FOUND" or "TARGET NOT FOUND"
+    statusLabel.TextColor3 = targetPart and Color3.fromRGB(180,180,180) or Color3.fromRGB(200,100,100)
+    toggleBtn.Text, toggleBtn.BackgroundColor3 = "START", Color3.fromRGB(70,70,75)
+end
+
+toggleBtn.MouseButton1Click:Connect(function() if isActive then stopLoop() else startLoop() end end)
+
+-- ===== CHARACTER RESPAWN =====
+player.CharacterAdded:Connect(function(newChar)
+    if isActive then stopLoop() end
+    if flyActive then disableFly() flyStatus = false flyBtn.Text, flyBtn.BackgroundColor3 = "FLY OFF", Color3.fromRGB(60,60,65) end
+    if noclipActive then
+        if character then removeNoclip(character) end
+        applyNoclip(newChar)
+    end
+    character = newChar
+    rootPart = character:FindFirstChild("HumanoidRootPart")
+    humanoid = character:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = 16 * savedSpeed
+        humanoid.JumpPower = 50 * savedJump
+    end
+    targetPart = getTargetPart()
+    statusLabel.Text = targetPart and "TARGET FOUND" or "TARGET NOT FOUND"
+    statusLabel.TextColor3 = targetPart and Color3.fromRGB(180,180,180) or Color3.fromRGB(200,100,100)
+    toggleBtn.Text, toggleBtn.BackgroundColor3 = "START", Color3.fromRGB(70,70,75)
+    touchCount = 0
+    counterLabel.Text = "TOUCHES: 0"
+    if isMinimized then expand() end
+    mainFrame.Visible = true
+    minimizedFrame.Visible = false
+end)
+
+print("maingui loaded ")
